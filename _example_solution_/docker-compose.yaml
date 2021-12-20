@@ -1,0 +1,13 @@
+version: '3.7'
+
+services:
+  db:
+    image: "mcr.microsoft.com/mssql/server:2017-latest"
+    ports:
+      - "1433:1433"
+    environment:
+      SA_PASSWORD: "D3v3loper!987"
+      ACCEPT_EULA: "Y"
+    volumes:
+      - ./_containers/mssql:/var/opt/mssql
+      
