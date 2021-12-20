@@ -187,7 +187,7 @@ $goo.Command.Add( 'dev', {
     $goo.Command.StartProcess('code','.')
 })
 
-# command: goo run | Start an instance of the API on port 5001
+# command: goo run | Run the console application
 $goo.Command.Add( 'run', {
     $goo.Command.RunExternal('dotnet','run',$script:CliProjectFolder)
 })
