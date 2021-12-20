@@ -71,6 +71,9 @@ $goo.Command.Add( 'init', {
     $goo.Command.Run( 'install' )
     $goo.Command.Run( 'clean' )
     $goo.Command.Run( 'build' )
+    $goo.Console.WriteInfo("Waiting for docker to start...")
+    $goo.Sleep( 10 )
+    $goo.Command.Run( 'load' )
 })
 
 # command: goo install | Ensures docker desktop, dotnet and other prerequisistes for the project is installed
