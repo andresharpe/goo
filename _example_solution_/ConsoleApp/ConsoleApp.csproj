@@ -8,4 +8,8 @@
     <UserSecretsId>3077298f-1ac6-481a-b6d0-6476aed49f68</UserSecretsId>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
+  </ItemGroup>
+
 </Project>

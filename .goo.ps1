@@ -187,9 +187,14 @@ $goo.Command.Add( 'dev', {
     $goo.Command.StartProcess('code','.')
 })
 
+# command: goo load | Create tbles and load fresh data for the pplication
+$goo.Command.Add( 'load', {
+    $goo.Command.RunExternal('dotnet','run -- load',$script:CliProjectFolder)
+})
+
 # command: goo run | Run the console application
 $goo.Command.Add( 'run', {
-    $goo.Command.RunExternal('dotnet','run',$script:CliProjectFolder)
+    $goo.Command.RunExternal('dotnet','run -- all',$script:CliProjectFolder)
 })
 
 # command: goo sql <query> | Executes a query on your local SQL server container
