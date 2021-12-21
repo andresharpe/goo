@@ -71,6 +71,28 @@ class GooCommand {
         return $ret
     }
 
+    [psObject] RunExternalExt([string]$cmd, [Object]$parameters) {
+        $pinfo = New-Object System.Diagnostics.ProcessStartInfo
+        $pinfo.FileName = $cmd
+        $pinfo.RedirectStandardError = $true
+        $pinfo.RedirectStandardOutput = $true
+        $pinfo.UseShellExecute = $false
+        $pinfo.Arguments = $parameters
+        $p = New-Object System.Diagnostics.Process
+        $p.StartInfo = $pinfo
+        $p.Start() | Out-Null
+        $p.WaitForExit()
+        $stdout = $p.StandardOutput.ReadToEnd()
+        $stderr = $p.StandardError.ReadToEnd()
+        
+        $obj = New-Object PSObject -Property @{
+            Output = $stdout
+            Error = $stderr
+            ExitCode = $p.ExitCode
+        }
+        return $obj
+    }
+
     [void] StartProcess( [string]$cmd, [Object]$parameters ) {
         if( $null -eq $parameters ) {
             Start-Process $cmd 

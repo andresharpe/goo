@@ -69,6 +69,7 @@ $Env:GOO_DEV_CONNECTIONSTRING = (
 # command: goo init | Run this command first, or to reset project completely. 
 $goo.Command.Add( 'init', {
     $goo.Command.Run( 'install' )
+    $goo.Docker.StopAllRunningContainers()
     $goo.Command.Run( 'clean' )
     $goo.Command.Run( 'build' )
     $goo.Console.WriteInfo("Waiting for docker to start...")
@@ -110,8 +111,8 @@ $goo.Command.Add( 'configureAndStartDocker', {
 $goo.Command.Add( 'clean', {
     $goo.Console.WriteInfo( "Cleaning data and distribution folders..." )
     $goo.Command.Run('dockerDownIfUp')
-    $goo.IO.EnsureRemoveFolder("$script:SolutionFolder\_containers\")
-    $goo.IO.EnsureRemoveFolder("$script:SolutionFolder\dist\")
+    $goo.IO.EnsureRemoveFolder("$script:SourceFolder\_containers\")
+    $goo.IO.EnsureRemoveFolder("$script:SourceFolder\dist\")
     $goo.Command.RunExternal('dotnet','clean --verbosity:quiet --nologo',$script:SolutionFolder)
     $goo.StopIfError("Failed to clean previous builds. (Release)")
 })

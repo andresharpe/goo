@@ -17,10 +17,10 @@ class GooSql {
 
     [void] Query( [string]$connString, [string]$sql ){
         if( -not ((Get-Module -ListAvailable -Name "SqlServer"))) {
-            $this.Error("Module not found. Please run 'Install-Module -Name SqlServer' as admin")
+            $this.Goo.Error("Module not found. Please run 'Install-Module -Name SqlServer' as admin")
         }
         Invoke-Sqlcmd -ConnectionString $connString -Query $sql | Format-Table -AutoSize | Out-Host
-        if( -not $? ) { $this.Error( "Sql error." ) }
+        if( -not $? ) { $this.Goo.Error( "Sql error." ) }
     }
 
 

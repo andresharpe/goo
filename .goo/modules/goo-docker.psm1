@@ -33,4 +33,12 @@ class GooDocker {
         }   
     }
 
+    [void] StopAllRunningContainers()
+    {
+        #$obj = $this.Goo.Command.RunExternalExt( 'docker','ps -q' )
+        #$containers = $obj.Output -split "`n"
+        #docker kill $containers
+        docker kill $(docker ps -q)
+    }
+
 }
