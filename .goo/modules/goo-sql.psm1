@@ -23,6 +23,27 @@ class GooSql {
         if( -not $? ) { $this.Goo.Error( "Sql error." ) }
     }
 
+    [bool] TestConnection([string]$connectionString) {
+        try {
+            $sqlConnection = New-Object System.Data.SqlClient.SqlConnection $ConnectionString
+            $sqlConnection.Open()
+            return $true
+        } catch {
+            return $false
+        } finally {
+            $sqlConnection.Close()
+        }
+    }
 
-
+    [bool] WaitForConnection([string]$connectionString, [int]$seconds) {
+        $ret = $false
+        for($i = $seconds; $i -gt 0; $i--) {
+            if($this.TestConnection($connectionString)) {
+                $ret = $true
+                break
+            }
+            $this.Goo.Sleep(1)
+        }
+        return $ret
+    }
 }

@@ -22,39 +22,53 @@ $goo = [Goo]::new($args)
 
 <# --- SET GLOBAL SCRIPT VARIABLES HERE --- #>
 
-$script:SourceFolder = '.\_example_solution_'
-$script:SolutionFolder = "$script:SourceFolder\Solution"
-$script:SolutionFile = "$script:SolutionFolder\Solution.sln"
-$script:CliProjectFolder = "$script:SourceFolder\ConsoleApp"
-$script:CliProjectFile = "$script:CliProjectFolder\ConsoleApp.csproj"
+$script:SolutionName            = 'GooExample'
+
+$script:SourceFolder            = '.\_example_solution_'
+$script:SolutionFolder          = "$script:SourceFolder\Solution"
+$script:SolutionFile            = "$script:SolutionFolder\Solution.sln"
+$script:CliProjectFolder        = "$script:SourceFolder\ConsoleApp"
+$script:CliProjectFile          = "$script:CliProjectFolder\ConsoleApp.csproj"
+
+$script:DefaultEnvironment      = 'Development'
+$script:DockerContainerName     = 'goo_example_solution'
+$script:DockerDbPort            = '1433'
+
+$script:DbServer                = '127.0.0.1'
+$script:DbPort                  = '1433'
+$script:DbName                  = 'model'
+$script:DbUser                  = 'sa'
+$script:DbPassword              = 'D3v3loper!987'
+$script:DbPort                  = '1433'
+
+$script:DbConnectionstring = (
+    "Server=$script:DbServer,$script:DockerDbPort;" +
+    "Database=$script:DbName;" + 
+    "User ID=$script:DbUser;" +
+    "Password=$script:DbPassword;" + 
+    "Integrated Security=false;" +
+    "Connection Timeout=120;" +
+    "Application Name=$script:SolutionName;" 
+)
 
 
-<# --- SET YOUR PEOJECT'S ENVIRONMENT VARIABLES HERE --- #>
+<# --- SET YOUR PROJECT'S ENVIRONMENT VARIABLES HERE --- #>
 
 if($null -eq $Env:Environment)
 {
-    $Env:ENVIRONMENT = "Development"
-    $Env:ASPNETCORE_ENVIRONMENT = $Env:ENVIRONMENT
+    $Env:ENVIRONMENT = $script:DefaultEnvironment
+    $Env:ASPNETCORE_ENVIRONMENT = $script:DefaultEnvironment
 }
 
-$Env:GOO_DOCKER_CONTAINER_NAME = "example_solution_"
-$Env:GOO_DEV_DBSERVER = "127.0.0.1"     
-$Env:GOO_DEV_DB = "model"                                           
-$Env:GOO_DEV_DBUSER = "sa"
-$Env:GOO_DEV_DBPASSWORD = "D3v3loper!987"
+$Env:GOO_CONTAINER_NAME = $script:DockerContainerName
+$Env:GOO_CONTAINER_PORT = $script:DockerDbPort
+$Env:GOO_DB_SERVER      = $script:DbServer     
+$Env:GOO_DB_NAME        = $script:DbName
+$Env:GOO_DB_USER        = $script:DbUser
+$Env:GOO_DB_PASSWORD    = $script:DbPassword
+$Env:GOO_DB_PORT        = $script:DbPort
 
-$Env:GOO_DEV_CONNECTIONSTRING = (
-    "user id=$Env:GOO_DEV_DBUSER;password=$Env:GOO_DEV_DBPASSWORD;" + 
-    "server=$Env:GOO_DEV_DBSERVER;database=$Env:GOO_DEV_DB;" + 
-    "Trusted_Connection=no;connection timeout=120;"
-)
-
-# --- ...OR UNCOMMENT THIS FOR SQL SERVER EXPRESS --- 
-# $Env:GOO_DEV_CONNECTIONSTRING = (
-#    "user id=$Env:GOO_DEV_DBUSER;password=$Env:GOO_DEV_DBPASSWORD" +
-#    ";server=($Env:COMPUTERNAME)\SQLEXPRESS;database=$Env:GOO_DEV_DB;" +
-#    "Trusted_Connection=no;connection timeout=120;"
-# )
+$Env:ConnectionStrings:DefaultConnection = $script:DbConnectionstring
 
 
 <# --- ADD YOUR COMMAND DEFINITIONS HERE --- #>
@@ -73,7 +87,9 @@ $goo.Command.Add( 'init', {
     $goo.Command.Run( 'clean' )
     $goo.Command.Run( 'build' )
     $goo.Console.WriteInfo("Waiting for docker to start...")
-    $goo.Sleep( 10 )
+    if( -not $goo.Sql.WaitForConnection( $script:DbConnectionstring, 30 )){
+        $goo.Error("Could not connect to SqlServer on [$script:DbServer,$script:DockerDbPort]")
+    }
     $goo.Command.Run( 'load' )
 })
 
@@ -134,7 +150,7 @@ $goo.Command.Add( 'buildSolution', {
 })
 
 $goo.Command.Add( 'refreshDocker', {
-    $goo.Console.WriteInfo("Refreshing container [$Env:GOO_DOCKER_CONTAINER_NAME]...")
+    $goo.Console.WriteInfo("Refreshing container [$script:DockerContainerName]...")
     $goo.Command.Run('dockerDownIfUp')
 })
 
@@ -160,8 +176,8 @@ $goo.Command.Add( 'down', {
 # command: goo attach | Attaches to your running SQL Server Docker container
 $goo.Command.Add( 'attach', {
     $goo.Console.WriteInfo('Attaching to local SQL Server...')
-    $goo.Command.RunExternal('docker',"attach $Env:GOO_DOCKER_CONTAINER_NAME" )
-    $goo.StopIfError("Failed to attach to container [$Env:GOO_DOCKER_CONTAINER_NAME].")
+    $goo.Command.RunExternal('docker',"attach $script:DockerContainerName" )
+    $goo.StopIfError("Failed to attach to container [$script:DockerContainerName].")
 })
 
 # command: goo env | Show all environment variables
@@ -180,9 +196,10 @@ $goo.Command.Add( 'env', { param($dbEnvironment,$dbInstance)
 
 # command: goo setenv <env>     | Sets local environment to <env> environment
 $goo.Command.Add( 'setenv', { param( $Environment )
+    $oldEnv = $Env:ENVIRONMENT
     $Env:ENVIRONMENT = $Environment
-    $Env:ASPNETCORE_ENVIRONMENT = $Env:ENVIRONMENT
-    $goo.Console.WriteInfo("Environment now set to [$Env:ENVIRONMENT]")
+    $Env:ASPNETCORE_ENVIRONMENT = $Environment
+    $goo.Console.WriteInfo("Environment changed from [$oldEnv] to [$Env:ENVIRONMENT]")
 })
 
 # command: goo dev | Start up Visual Studio and VS Code for solution
@@ -203,7 +220,7 @@ $goo.Command.Add( 'run', {
 
 # command: goo sql <query> | Executes a query on your local SQL server container
 $goo.Command.Add( 'sql', { param( $sql )
-    $goo.Sql.Query( $Env:GOO_DEV_CONNECTIONSTRING, $sql )
+    $goo.Sql.Query( $script:DbConnectionstring, $sql )
 })
 
 # command: goo pull | Pull everything from master and creates a new branch

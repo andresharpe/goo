@@ -3,10 +3,11 @@ version: '3.7'
 services:
   db:
     image: "mcr.microsoft.com/mssql/server:2019-latest"
+    container_name: "${GOO_CONTAINER_NAME}"
     ports:
-      - "1433:1433"
+      - "${GOO_CONTAINER_PORT}:${GOO_DB_PORT}"
     environment:
-      SA_PASSWORD: "D3v3loper!987"
+      SA_PASSWORD: "${GOO_DB_PASSWORD}"
       ACCEPT_EULA: "Y"
     volumes:
       - ./_containers/mssql:/var/opt/mssql

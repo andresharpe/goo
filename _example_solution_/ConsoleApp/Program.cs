@@ -48,7 +48,7 @@ namespace Goo.Example
             SqlCommand command;
             string sql;
 
-            conn = new SqlConnection(Environment.GetEnvironmentVariable("GOO_DEV_CONNECTIONSTRING"));
+            conn = new SqlConnection(Environment.GetEnvironmentVariable("ConnectionStrings:DefaultConnection"));
             conn.Open();
 
             // Create table if not exist and remove rows
@@ -98,7 +98,7 @@ namespace Goo.Example
             SqlCommand command;
             string sql;
 
-            conn = new SqlConnection(Environment.GetEnvironmentVariable("GOO_DEV_CONNECTIONSTRING"));
+            conn = new SqlConnection(Environment.GetEnvironmentVariable("ConnectionStrings:DefaultConnection"));
             conn.Open();
 
             // Select a rondom row

@@ -20,7 +20,7 @@ class GooDocker {
     }
 
     [void] Up( [string]$folder ) {
-        $this.Goo.Command.RunExternal( 'docker-compose', 'up -d', $folder ) 
+        $this.Goo.Command.RunExternal( 'docker-compose', "up -d", $folder ) 
     }
 
     [void] Down(){
@@ -35,10 +35,8 @@ class GooDocker {
 
     [void] StopAllRunningContainers()
     {
-        #$obj = $this.Goo.Command.RunExternalExt( 'docker','ps -q' )
-        #$containers = $obj.Output -split "`n"
-        #docker kill $containers
-        docker kill $(docker ps -q)
+        $containers = $(docker ps -q)
+        if($containers.count -gt 0){ docker kill $containers }
     }
 
 }

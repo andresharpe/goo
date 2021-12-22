@@ -56,6 +56,8 @@ class Goo {
 
     [void] Start() {
 
+        $startTime = $(get-date)
+
         $oldProgressPreference = $global:ProgressPreference
 
         $global:ProgressPreference = "SilentlyContinue"
@@ -66,7 +68,9 @@ class Goo {
             try {
                 $this.Console.WriteInfo("Environment is [$Env:ENVIRONMENT]")
                 $this.Command.Run()
-                $this.Console.WriteInfo('Success!')
+                $elapsedTime = $(get-date) - $startTime
+                $totalTime = "{0:HH:mm:ss}" -f ([datetime]$elapsedTime.Ticks)
+                $this.Console.WriteInfo("Success! ($totalTime)")
         
             } catch {
                 Pop-Location
