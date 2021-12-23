@@ -233,8 +233,14 @@ $goo.Command.Add( 'main', { param( $featureName )
     $goo.Git.CheckoutMain()
 })
 
+# command: goo push <message> | Performs 'git add -A', 'git commit -m <message>', 'git -u push origin'
+$goo.Command.Add( 'push', { param( $message )
+    $goo.Git.AddCommitPushRemote($message)
+})
+
+
 # command: goo pull | Pull everything from master and creates a new branch
-$goo.Command.Add( 'pull', {
+$goo.Command.Add( 'xpull', {
     # save current changes into a separate backup branch
     $date = "{0:d}" -f (get-date)
     $branchName =-join($env:UserName,'-', $date) 
@@ -254,7 +260,7 @@ $goo.Command.Add( 'pull', {
 })
 
 # command: goo push | Push current branch to remote git
-$goo.Command.Add( 'push', {
+$goo.Command.Add( 'xpush', {
 
     # check if it's master branch and abort if so
     $currentBranch = Invoke-Expression "& git branch --show-current"

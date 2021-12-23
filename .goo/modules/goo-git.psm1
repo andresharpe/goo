@@ -24,20 +24,24 @@ class GooGit {
 
     [void] CheckoutMain()
     {
-        git checkout main
+        $headBranch = $($(git remote show origin | Select-String -Pattern "HEAD branch: " -Raw -SimpleMatch -CaseSensitive) -replace "HEAD branch: ", "").Trim()
+        git checkout $headBranch
         if($?) { git pull --prune }
         if($?) { git fetch origin }
-        if($?) { git reset --hard origin/main }
+        if($?) { git reset --hard origin/$headBranch }
         if($?) { git clean -f -d }
     }
 
     [void] CheckoutMaster()
     {
-        git checkout master
-        if($?) { git pull --prune }
-        if($?) { git fetch origin }
-        if($?) { git reset --hard origin/master }
-        if($?) { git clean -f -d }
+        $this.CheckoutMain()
+    }
+
+    [void] AddCommitPushRemote($message)
+    {
+        git add -A 
+        if($?) { git commit -m $message }
+        if($?) { git push -u origin }
     }
 }
 
