@@ -74,7 +74,7 @@ class Goo {
                 "goo-bump-patch"   { $this.GooBumpVersion('patch') ; return; }
                 "goo-bump-minor"   { $this.GooBumpVersion('minor') ; return; }
                 "goo-bump-major"   { $this.GooBumpVersion('major') ; return; }
-                "goo-update"       { $this.GooRelease(); return; }
+                "goo-update"       { $this.GooUpdate(); return; }
             }
 
             try {
