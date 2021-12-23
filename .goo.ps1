@@ -246,40 +246,6 @@ $goo.Command.Add( 'push', { param( $message )
     }
 })
 
-
-# command: goo pull | Pull everything from master and creates a new branch
-$goo.Command.Add( 'xpull', {
-    # save current changes into a separate backup branch
-    $date = "{0:d}" -f (get-date)
-    $branchName =-join($env:UserName,'-', $date) 
-    $anyPendingChanges = Invoke-Expression "& git status"
-    if ($anyPendingChanges -contains "nothing to commit, working tree clean") {
-        $goo.Command.RunExternal('git', 'checkout -b temp/' + $branchName)
-        $goo.Command.RunExternal('git', 'add -A')
-        $goo.Command.RunExternal('git', 'commit -m "Save local change to branch : temp/' + $branchName)
-    }
-    # create a new branch
-    $date = "{0:d}" -f (get-date)
-    $branchName =-join($env:UserName,'-', $date) 
-    $goo.Command.RunExternal('git', 'checkout master')
-    $goo.Command.RunExternal('git', 'reset --hard')
-    $goo.Command.RunExternal('git','pull')
-    $goo.Command.RunExternal('git','checkout -b feature/' + $branchName)
-})
-
-# command: goo push | Push current branch to remote git
-$goo.Command.Add( 'xpush', {
-
-    # check if it's master branch and abort if so
-    $currentBranch = Invoke-Expression "& git branch --show-current"
-    if( @('master', 'main') -contains $currentBranch ){
-        # ignore
-    }
-    else{
-        $goo.Command.RunExternal('git','push -u origin ' + $currentBranch)
-    }
-})
-
 <# --- START GOO EXECUTION --- #>
 
 $goo.Start()
