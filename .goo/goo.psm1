@@ -116,6 +116,7 @@ class Goo {
 
     [void] GooUpdate()
     {
+        $this.GooGetVersion();
         $this.Console.WriteInfo("Updating...")
         Invoke-WebRequest -Method Get -Uri 'https://github.com/andresharpe/goo/releases/download/latest/publish.zip' -OutFile '.\goo-latest.zip'
         Expand-Archive -Path '.\goo-latest.zip' -DestinationPath '.' -Force
