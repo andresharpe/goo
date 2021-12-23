@@ -228,9 +228,9 @@ $goo.Command.Add( 'feature', { param( $featureName )
     $goo.Git.CheckoutFeature($featureName)
 })
 
-# command: goo main | Checks out the master branch and prunes features removed at origin
-$goo.Command.Add( 'master', { param( $featureName )
-    $goo.Git.CheckoutMaster()
+# command: goo main | Checks out the main branch and prunes features removed at origin
+$goo.Command.Add( 'main', { param( $featureName )
+    $goo.Git.CheckoutMain()
 })
 
 # command: goo pull | Pull everything from master and creates a new branch
