@@ -25,7 +25,7 @@ class GooDotnet {
     }
 
     [void] SecretsSet( [string]$projectFile, [hashtable]$hash ) {
-        $fileName = EnsureSecretsFileExists($projectFile)
+        $fileName = $this.EnsureSecretsFileExists($projectFile)
         $obj = Get-Content -Path $fileName | ConvertFrom-Json
         foreach( $kvp in $hash.GetEnumerator() ) {
             $propName = $kvp.name
@@ -40,7 +40,7 @@ class GooDotnet {
     }
 
     [void] SecretsRemove( [string]$projectFile, [string[]]$list ) {
-        $fileName = EnsureSecretsFileExists($projectFile)
+        $fileName = $this.EnsureSecretsFileExists($projectFile)
         $obj = Get-Content -Path $fileName | ConvertFrom-Json
         foreach( $propName in $list ) {
             if( [bool]($obj.PSobject.Properties.name -match $propName) ) {
