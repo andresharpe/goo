@@ -30,5 +30,14 @@ class GooGit {
         if($?) { git reset --hard origin/main }
         if($?) { git clean -f -d }
     }
+
+    [void] CheckoutMaster()
+    {
+        git checkout master
+        if($?) { git pull --prune }
+        if($?) { git fetch origin }
+        if($?) { git reset --hard origin/master }
+        if($?) { git clean -f -d }
+    }
 }
 
