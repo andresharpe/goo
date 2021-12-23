@@ -74,6 +74,7 @@ class Goo {
                 "goo-bump-patch"   { $this.GooBumpVersion('patch') ; return; }
                 "goo-bump-minor"   { $this.GooBumpVersion('minor') ; return; }
                 "goo-bump-major"   { $this.GooBumpVersion('major') ; return; }
+                "goo-update"       { $this.GooRelease(); return; }
             }
 
             try {
@@ -115,9 +116,11 @@ class Goo {
 
     [void] GooUpdate()
     {
+        $this.Console.WriteInfo("Updating...")
         Invoke-WebRequest -Method Get -Uri 'https://github.com/andresharpe/goo/releases/download/latest/publish.zip' -OutFile '.\goo-latest.zip'
         Expand-Archive -Path '.\goo-latest.zip' -DestinationPath '.' -Force
         Remove-Item '.\goo-latest.zip' -Force
+        $this.GooGetVersion();
     }
 
     [void] GooBumpVersion([string] $part)
