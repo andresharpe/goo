@@ -230,7 +230,7 @@ $goo.Command.Add( 'feature', { param( $featureName )
 
 # command: goo main | Checks out the main branch and prunes features removed at origin
 $goo.Command.Add( 'main', { param( $featureName )
-    $goo.Git.CheckoutMain()
+    $goo.Git.CheckoutMaster()
 })
 
 # command: goo pull | Pull everything from master and creates a new branch
