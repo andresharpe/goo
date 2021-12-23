@@ -10,6 +10,7 @@ using module '.\modules\goo-dotnet.psm1'
 using module '.\modules\goo-benchmark.psm1'
 using module '.\modules\goo-git.psm1'
 using module '.\modules\goo-docker.psm1'
+using module '.\modules\goo-version.psm1'
 
 # ensure goo.ps1 in this folder is in path
 if( -not( $env:Path.Contains('\.goo') ) ) {
@@ -20,6 +21,8 @@ if( -not( $env:Path.Contains('\.goo') ) ) {
 <# GOO CLASS IMPLEMENTATION #>
 
 class Goo {
+
+    [string]$Arguments
     
     [GooIO]$IO
     [GooConsole]$Console
@@ -31,9 +34,12 @@ class Goo {
     [GooBenchmark]$Benchmark
     [GooGit]$Git
     [GooDocker]$Docker
+    [GooVersion]$Version
 
     Goo( [Object[]]$arguments ){
         
+        $this.Arguments = $arguments
+
         # install modules
         $this.IO = [GooIO]::new( $this )
         $this.Console = [GooConsole]::new( $this )
@@ -45,11 +51,7 @@ class Goo {
         $this.Benchmark = [GooBenchmark]::new( $this )
         $this.Git = [GooGit]::new( $this )
         $this.Docker = [GooDocker]::new( $this )
-
-        $this.PSObject.Properties.Add(
-            (New-Object PSScriptProperty 'ReadOnlyProperty', {$this._ROF})
-        )
-
+        $this.Version = [GooVersion]::new( $this )
 
     }
 
@@ -57,14 +59,23 @@ class Goo {
     [void] Start() {
 
         $startTime = $(get-date)
-
         $oldProgressPreference = $global:ProgressPreference
-
         $global:ProgressPreference = "SilentlyContinue"
-
         $this.Console.WriteBanner()
+        
+        try {
 
-        if( $this.Command.MainCommand -eq "help" ) { $this.Console.WriteHelp() } else {
+            switch ($this.Command.MainCommand)
+            {
+                "help"             { $this.Console.WriteHelp(); return; }
+                "goo-release"      { $this.GooRelease(); return; }
+                "goo-version"      { $this.GooGetVersion() ; return; }
+                "goo-bump-build"   { $this.GooBumpVersion('build') ; return; }
+                "goo-bump-patch"   { $this.GooBumpVersion('patch') ; return; }
+                "goo-bump-minor"   { $this.GooBumpVersion('minor') ; return; }
+                "goo-bump-major"   { $this.GooBumpVersion('major') ; return; }
+            }
+
             try {
                 $this.Console.WriteInfo("Environment is [$Env:ENVIRONMENT]")
                 $this.Command.Run()
@@ -76,14 +87,49 @@ class Goo {
                 Pop-Location
                 $this.Console.WriteError("Error - $PSItem :(")
             }
+    
         }
-
-        $global:ProgressPreference = $oldProgressPreference
-
+        finally {
+            $global:ProgressPreference = $oldProgressPreference
+        }
     }
 
     [void] Error( [string]$message ) {
         throw $message
+    }
+
+    [void] GooRelease()
+    {
+        $this.IO.EnsureFolderExists('.\dist')
+        Compress-Archive -Path '.\.goo' -CompressionLevel Optimal -DestinationPath '.\dist\publish.zip' -Force
+
+        $this.Command.RunExternal('gh','release delete latest --yes' )
+
+        $ver = $this.Version.Get('.\.goo\goo.version')
+        
+        $this.Command.RunExternal('gh','release create latest --notes "latest release" --title "v'+"$($ver.Major).$($ver.Minor).$($ver.Patch)"+'" .\dist\publish.zip' )
+        $this.StopIfError("Failed to create latest release on GitHub (gh cli)")
+
+        $this.Command.RunExternal('gh', 'release list --limit 3')
+    }
+
+    [void] GooUpdate()
+    {
+        Invoke-WebRequest -Method Get -Uri 'https://github.com/andresharpe/goo/releases/download/latest/publish.zip' -OutFile '.\goo-latest.zip'
+        Expand-Archive -Path '.\goo-latest.zip' -DestinationPath '.' -Force
+        Remove-Item '.\goo-latest.zip' -Force
+    }
+
+    [void] GooBumpVersion([string] $part)
+    {
+        $newVersion = $this.Version.Bump( '.\.goo\goo.version', $part )
+        $this.Console.WriteInfo("Bumped Goo $part version. The new version is $newVersion")
+    }
+
+    [void] GooGetVersion()
+    {
+        $currentVersion = $this.Version.CurrentVersion('.\.goo\goo.version')
+        $this.Console.WriteInfo("The current version of Goo is $currentVersion")
     }
 
     [void] StopIfError( [string]$message ) {
