@@ -223,6 +223,16 @@ $goo.Command.Add( 'sql', { param( $sql )
     $goo.Sql.Query( $script:DbConnectionstring, $sql )
 })
 
+# command: goo feature <feauture> | Creates a new feature branch from your main git branch
+$goo.Command.Add( 'feature', { param( $featureName )
+    $goo.Git.CheckoutFeature($featureName)
+})
+
+# command: goo main | Checks out the main branch and prunes features removed at origin
+$goo.Command.Add( 'main', { param( $featureName )
+    $goo.Git.CheckoutMain()
+})
+
 # command: goo pull | Pull everything from master and creates a new branch
 $goo.Command.Add( 'pull', {
     # save current changes into a separate backup branch

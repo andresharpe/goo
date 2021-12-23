@@ -67,7 +67,7 @@ class Goo {
 
             switch ($this.Command.MainCommand)
             {
-                "help"             { $this.Console.WriteHelp(); return; }
+                "help"             { $this.Console.WriteHelp(); $this.GooGetVersion(); return; }
                 "goo-release"      { $this.GooRelease(); return; }
                 "goo-version"      { $this.GooGetVersion() ; return; }
                 "goo-bump-build"   { $this.GooBumpVersion('build') ; return; }
@@ -127,13 +127,18 @@ class Goo {
     [void] GooBumpVersion([string] $part)
     {
         $newVersion = $this.Version.Bump( '.\.goo\goo.version', $part )
-        $this.Console.WriteInfo("Bumped Goo $part version. The new version is $newVersion")
+        $this.Console.WriteInfo("Bumped goo $part version. The new version is $newVersion")
     }
 
     [void] GooGetVersion()
     {
         $currentVersion = $this.Version.CurrentVersion('.\.goo\goo.version')
-        $this.Console.WriteInfo("The current version of Goo is $currentVersion")
+        $latestVersion = $this.Version.LatestVersion('.\.goo\goo.version')
+
+        if( -not $currentVersion.StartsWith($latestVersion) ){
+            $this.Console.WriteInfo("The current version of goo is $currentVersion. There is a newer version of goo ($latestVersion)!")
+            $this.Console.WriteInfo("Run 'goo goo-update' to update your project.")
+        }
     }
 
     [void] StopIfError( [string]$message ) {

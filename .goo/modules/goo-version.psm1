@@ -50,6 +50,13 @@ class GooVersion {
         $version = $this.Get($versionInfoFile)
         return "$($version.Major).$($version.Minor).$($version.Patch) (build $($version.Build))"
     }
+    
+    [string] LatestVersion([string]$versionInfoFile)
+    {
+        $info = Invoke-WebRequest -Method Get -Uri "https://api.github.com/repos/andresharpe/goo/releases/latest" | ConvertFrom-Json 
+        return $info.Name.Trim('v')
+    }
+    
 
     [string] BumpBuild([string]$versionInfoFile)
     {
