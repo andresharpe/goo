@@ -24,8 +24,8 @@ class GooGit {
 
     [void] CheckoutMain()
     {
-        $headBranch = $($(git remote show origin | Select-String -Pattern "HEAD branch: " -Raw -SimpleMatch -CaseSensitive) -replace "HEAD branch: ", "").Trim()
-        git checkout $headBranch
+        $headBranch = 
+        git checkout $this.HeadBranch()
         if($?) { git pull --prune }
         if($?) { git fetch origin }
         if($?) { git reset --hard origin/$headBranch }
@@ -42,6 +42,16 @@ class GooGit {
         git add -A 
         if($?) { git commit -m $message }
         if($?) { git push -u origin }
+    }
+
+    [string] CurrentBranch()
+    {
+        return $(git branch --show-current)
+    }
+
+    [string] HeadBranch()
+    {
+        return $($(git remote show origin | Select-String -Pattern "HEAD branch: " -Raw -SimpleMatch -CaseSensitive) -replace "HEAD branch: ", "").Trim()
     }
 }
 
