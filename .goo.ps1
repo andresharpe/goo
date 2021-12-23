@@ -194,7 +194,7 @@ $goo.Command.Add( 'env', { param($dbEnvironment,$dbInstance)
 
 })
 
-# command: goo setenv <env>     | Sets local environment to <env> environment
+# command: goo setenv <env> | Sets local environment to <env> environment
 $goo.Command.Add( 'setenv', { param( $Environment )
     $oldEnv = $Env:ENVIRONMENT
     $Env:ENVIRONMENT = $Environment
