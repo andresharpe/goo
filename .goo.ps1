@@ -223,9 +223,10 @@ $goo.Command.Add( 'sql', { param( $sql )
     $goo.Sql.Query( $script:DbConnectionstring, $sql )
 })
 
-# command: goo feature <feauture> | Creates a new feature branch from your main git branch
+# command: goo feature <name> | Creates a new feature branch from your main git branch
 $goo.Command.Add( 'feature', { param( $featureName )
     $goo.Git.CheckoutFeature($featureName)
+    $goo.GooBumpVersion('build')
 })
 
 # command: goo main | Checks out the main branch and prunes features removed at origin
@@ -235,7 +236,14 @@ $goo.Command.Add( 'main', { param( $featureName )
 
 # command: goo push <message> | Performs 'git add -A', 'git commit -m <message>', 'git -u push origin'
 $goo.Command.Add( 'push', { param( $message )
-    $goo.Git.AddCommitPushRemote($message)
+    $current = $goo.Git.CurrentBranch()
+    $head = $goo.Git.HeadBranch()
+    if($head -eq $current) {
+        $goo.Error("You can't push directly to the '$head' branch")
+    }
+    else {
+        $goo.Git.AddCommitPushRemote($message)
+    }
 })
 
 
