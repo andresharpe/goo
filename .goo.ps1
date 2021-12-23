@@ -246,6 +246,20 @@ $goo.Command.Add( 'push', { param( $message )
     }
 })
 
+# command: goo pr | Performs and merges a pull request, checkout main and publish'
+$goo.Command.Add( 'pr', { 
+    gh pr create --fill
+    if($?) { gh pr merge --merge }
+    $goo.Command.Run( 'main' )
+})
+
+# command: goo publish | Releases goo to the world'
+$goo.Command.Add( 'publish', { 
+    $goo.GooBumpVersion('patch')
+    $goo.GooRelease()
+})
+
+
 <# --- START GOO EXECUTION --- #>
 
 $goo.Start()
