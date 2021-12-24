@@ -4,6 +4,7 @@ class GooVersion {
 
     [string]$Name
     [Object]$Goo
+    [string]$Current
 
     hidden [string]$_defaultVersionInfoFile = '.\.goo\goo.version'
     hidden [string]$_latestVersionInfoFile = '.\.goo\goo.latest.version'
@@ -14,6 +15,7 @@ class GooVersion {
     GooVersion( [Object]$goo ){
         $this.Name = "Version"
         $this.Goo = $goo
+        $this.Current = $this.CurrentVersion($this._defaultVersionInfoFile)
     }
 
     [string] ToString()
@@ -60,7 +62,7 @@ class GooVersion {
     [string] LatestVersion([string]$versionInfoFile)
     {
         if(-not $this.Goo.Network.IsOnline() ) {
-            return $this.CurrentVersion($versionInfoFile)
+            return $this.Current
         }
 
         if( -not (Test-Path variable:global:GOO_LATEST_VERSION)) {
@@ -190,7 +192,7 @@ class GooVersion {
 
     [void] GooGetVersion([bool]$forceShow)
     {
-        $currentVersion = $this.CurrentVersion($this._defaultVersionInfoFile)
+        $currentVersion = $this.Current
         $latestVersion = $this.LatestVersion($this._defaultVersionInfoFile)
         $isOutOfDate = (-not $currentVersion.StartsWith($latestVersion))
 

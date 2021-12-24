@@ -81,7 +81,7 @@ class GooConsole {
         $this.WriteLine(' __ __ __') 
         $this.Write('/_//_//_/') 
         $this.WriteHighlight('  >  ') 
-        $this.WriteLine('Goo v1.2 - Type less. Code more.') 
+        $this.WriteLine("Goo v$($this.Goo.Version.Current) - Type less. Code more.") 
         $this.WriteLine('_/')
         $this.WriteInfo("Project folder is [$(Get-Location | Split-Path -Leaf)]")
     }
