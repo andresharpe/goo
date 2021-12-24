@@ -5,6 +5,12 @@ class GooVersion {
     [string]$Name
     [Object]$Goo
 
+    hidden [string]$_defaultVersionInfoFile = '.\.goo\goo.version'
+    hidden [string]$_latestVersionInfoFile = '.\.goo\goo.latest.version'
+    hidden [string]$_versionPattern = '(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)'
+    hidden [string]$_projectReleaseUri = 'https://github.com/andresharpe/goo/releases/download/latest/publish.zip'
+    hidden [string]$_projectLatestInfoUri ='https://api.github.com/repos/andresharpe/goo/releases/latest'
+
     GooVersion( [Object]$goo ){
         $this.Name = "Version"
         $this.Goo = $goo
@@ -53,11 +59,17 @@ class GooVersion {
     
     [string] LatestVersion([string]$versionInfoFile)
     {
-        $info = Invoke-WebRequest -Method Get -Uri "https://api.github.com/repos/andresharpe/goo/releases/latest" | ConvertFrom-Json 
-        return $info.Name.Trim('v')
+        if(-not $this.Goo.Network.IsOnline() ) {
+            return $this.CurrentVersion($versionInfoFile)
+        }
+
+        if( -not (Test-Path variable:global:GOO_LATEST_VERSION)) {
+            $global:GOO_LATEST_VERSION = (Invoke-WebRequest -Method Get -Uri $this._projectLatestInfoUri | ConvertFrom-Json).Name.Trim('v')
+        }
+
+        return $global:GOO_LATEST_VERSION
     }
     
-
     [string] BumpBuild([string]$versionInfoFile)
     {
         return $this.Bump($versionInfoFile,'Build')
@@ -81,7 +93,7 @@ class GooVersion {
     [object] Get([string]$versionInfoFile)
     {
     	
-    	$versionPattern = '(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)'
+    	$versionPattern = $this._versionPattern
 
         if(Test-Path $versionInfoFile) {
             $versionInfo = Get-ChildItem $versionInfoFile 
@@ -122,7 +134,7 @@ class GooVersion {
 
     [void] Set([object]$version)
     {
-    	$versionPattern = '(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)'
+    	$versionPattern = $this._versionPattern
         $newVersion = "$($version.Major).$($version.Minor).$($version.Patch).$($version.Build)"
 
   		$currentFile = $version.FileName
@@ -136,4 +148,58 @@ class GooVersion {
    		
         Rename-Item $tempFile $currentFile
     }
+
+    # User callable commands
+
+    [void] GooRelease()
+    {
+        $this.Goo.IO.EnsureFolderExists('.\dist')
+        Compress-Archive -Path '.\.goo' -CompressionLevel Optimal -DestinationPath '.\dist\publish.zip' -Force
+
+        $this.Goo.Command.RunExternal('gh','release delete latest --yes' )
+
+        $ver = $this.Get($this._defaultVersionInfoFile)
+        $this.Goo.Command.RunExternal('gh','release create latest --notes "latest release" --title "v'+"$($ver.Major).$($ver.Minor).$($ver.Patch)"+'" .\dist\publish.zip' )
+        $this.Goo.StopIfError("Failed to create latest release on GitHub (gh cli)")
+
+        $this.Goo.Command.RunExternal('gh', 'release list --limit 3')
+    }
+
+    [void] GooUpdate()
+    {
+        $this.GooGetVersion();
+        $this.Goo.Console.WriteInfo("Updating...")
+        
+        $tempFile = New-TemporaryFile
+        Invoke-WebRequest -Method Get -Uri $this._projectReleaseUri -OutFile $tempFile
+        Expand-Archive -Path $tempFile -DestinationPath '.' -Force
+        Remove-Item $tempFile -Force
+
+        $this.GooGetVersion();
+    }
+
+    [void] GooBumpVersion([string] $part)
+    {
+        $newVersion = $this.Bump( $this._defaultVersionInfoFile, $part )
+        $this.Goo.Console.WriteInfo("Bumped goo $part version. The new version is $newVersion")
+    }
+
+    [void] GooGetVersion() {
+        $this.GooGetVersion($false)
+    }
+
+    [void] GooGetVersion([bool]$forceShow)
+    {
+        $currentVersion = $this.CurrentVersion($this._defaultVersionInfoFile)
+        $latestVersion = $this.LatestVersion($this._defaultVersionInfoFile)
+        $isOutOfDate = (-not $currentVersion.StartsWith($latestVersion))
+
+        if( $forceShow -or $isOutOfDate){
+            $this.Goo.Console.WriteInfo("The current version of goo is $currentVersion. The latest version of goo is ($latestVersion)!")
+            if( $isOutOfDate ){
+                $this.Goo.Console.WriteInfo("Run 'goo goo-update' to update your project.")
+            }
+        }
+    }
+
 }

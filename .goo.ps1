@@ -226,12 +226,7 @@ $goo.Command.Add( 'sql', { param( $sql )
 # command: goo feature <name> | Creates a new feature branch from your main git branch
 $goo.Command.Add( 'feature', { param( $featureName )
     $goo.Git.CheckoutFeature($featureName)
-    $goo.GooBumpVersion('build')
-})
-
-# command: goo main | Checks out the main branch and prunes features removed at origin
-$goo.Command.Add( 'main', { param( $featureName )
-    $goo.Git.CheckoutMain()
+    $goo.Version.GooBumpVersion('build')
 })
 
 # command: goo push <message> | Performs 'git add -A', 'git commit -m <message>', 'git -u push origin'
@@ -255,8 +250,13 @@ $goo.Command.Add( 'pr', {
 
 # command: goo publish | Releases goo to the world'
 $goo.Command.Add( 'publish', { 
-    $goo.GooBumpVersion('patch')
-    $goo.GooRelease()
+    $goo.Version.GooBumpVersion('patch')
+    $goo.Version.GooRelease()
+})
+
+# command: goo main | Checks out the main branch and prunes features removed at origin
+$goo.Command.Add( 'main', { param( $featureName )
+    $goo.Git.CheckoutMain()
 })
 
 

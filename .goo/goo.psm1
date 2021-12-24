@@ -67,14 +67,14 @@ class Goo {
 
             switch ($this.Command.MainCommand)
             {
-                "help"             { $this.Console.WriteHelp(); $this.GooGetVersion(); return; }
-                "goo-release"      { $this.GooRelease(); return; }
-                "goo-version"      { $this.GooGetVersion() ; return; }
-                "goo-bump-build"   { $this.GooBumpVersion('build') ; return; }
-                "goo-bump-patch"   { $this.GooBumpVersion('patch') ; return; }
-                "goo-bump-minor"   { $this.GooBumpVersion('minor') ; return; }
-                "goo-bump-major"   { $this.GooBumpVersion('major') ; return; }
-                "goo-update"       { $this.GooUpdate(); return; }
+                "help"             { $this.Console.WriteHelp(); $this.Version.GooGetVersion(); return; }
+                "goo-version"      { $this.Version.GooGetVersion($true) ; return; }
+                "goo-bump-build"   { $this.Version.GooBumpVersion('build') ; return; }
+                "goo-bump-patch"   { $this.Version.GooBumpVersion('patch') ; return; }
+                "goo-bump-minor"   { $this.Version.GooBumpVersion('minor') ; return; }
+                "goo-bump-major"   { $this.Version.GooBumpVersion('major') ; return; }
+                "goo-release"      { $this.Version.GooRelease(); return; }
+                "goo-update"       { $this.Version.GooUpdate(); return; }
             }
 
             try {
@@ -97,48 +97,6 @@ class Goo {
 
     [void] Error( [string]$message ) {
         throw $message
-    }
-
-    [void] GooRelease()
-    {
-        $this.IO.EnsureFolderExists('.\dist')
-        Compress-Archive -Path '.\.goo' -CompressionLevel Optimal -DestinationPath '.\dist\publish.zip' -Force
-
-        $this.Command.RunExternal('gh','release delete latest --yes' )
-
-        $ver = $this.Version.Get('.\.goo\goo.version')
-        
-        $this.Command.RunExternal('gh','release create latest --notes "latest release" --title "v'+"$($ver.Major).$($ver.Minor).$($ver.Patch)"+'" .\dist\publish.zip' )
-        $this.StopIfError("Failed to create latest release on GitHub (gh cli)")
-
-        $this.Command.RunExternal('gh', 'release list --limit 3')
-    }
-
-    [void] GooUpdate()
-    {
-        $this.GooGetVersion();
-        $this.Console.WriteInfo("Updating...")
-        Invoke-WebRequest -Method Get -Uri 'https://github.com/andresharpe/goo/releases/download/latest/publish.zip' -OutFile '.\goo-latest.zip'
-        Expand-Archive -Path '.\goo-latest.zip' -DestinationPath '.' -Force
-        Remove-Item '.\goo-latest.zip' -Force
-        $this.GooGetVersion();
-    }
-
-    [void] GooBumpVersion([string] $part)
-    {
-        $newVersion = $this.Version.Bump( '.\.goo\goo.version', $part )
-        $this.Console.WriteInfo("Bumped goo $part version. The new version is $newVersion")
-    }
-
-    [void] GooGetVersion()
-    {
-        $currentVersion = $this.Version.CurrentVersion('.\.goo\goo.version')
-        $latestVersion = $this.Version.LatestVersion('.\.goo\goo.version')
-
-        if( -not $currentVersion.StartsWith($latestVersion) ){
-            $this.Console.WriteInfo("The current version of goo is $currentVersion. There is a newer version of goo ($latestVersion)!")
-            $this.Console.WriteInfo("Run 'goo goo-update' to update your project.")
-        }
     }
 
     [void] StopIfError( [string]$message ) {
