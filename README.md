@@ -17,7 +17,7 @@ Many projects on Github and private repositories take hours to get working on a 
 They require a developer to follow (frequently out of date) ‘Getting Started’ instructions on which tools and dependencies to install to make a project work, which environment variables to set, docker containers to start, etc.
 
 Use `goo` too make cloning and running a project as easy as..
-```
+```PowerShell
 git clone <some_repo>
 cd <my_awesome_project>
 goo init
@@ -52,7 +52,7 @@ As `goo` scripts are built on Powershell, you can leverage the full capability a
 
 You can use the rich set of class modules included with `goo` and add your own.
 
-```
+```PowerShell
 # command: goo clean | Removes data and build output
 $goo.Command.Add( 'clean', {
     $goo.Console.WriteInfo( "Cleaning project..." )
@@ -66,7 +66,7 @@ $goo.Command.Add( 'clean', {
 
 ## Getting Started
 To add `goo` to your project: Start Powershell and navigate to your project folder root. Then type:
-```
+```PowerShell
 iwr get.goo.dev | iex
 ```
 This will add `.goo` as a folder to your project and create a sample `.goo.ps1` script in your main project folder.
