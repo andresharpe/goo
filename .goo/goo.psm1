@@ -12,12 +12,6 @@ using module '.\modules\goo-git.psm1'
 using module '.\modules\goo-docker.psm1'
 using module '.\modules\goo-version.psm1'
 
-# ensure goo.ps1 in this folder is in path
-if( -not( $env:Path.Contains('\.goo') ) ) {
-    $thisPath = (Split-Path -Path $PSCommandPath -Parent) + ';'
-    $env:Path = $thisPath+$env:Path
-}
-
 <# GOO CLASS IMPLEMENTATION #>
 
 class Goo {
