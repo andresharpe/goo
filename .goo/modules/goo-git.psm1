@@ -24,8 +24,8 @@ class GooGit {
 
     [void] CheckoutMain()
     {
-        $headBranch = 
-        git checkout $this.HeadBranch()
+        $headBranch = $this.HeadBranch() 
+        git checkout $headBranch
         if($?) { git pull --prune }
         if($?) { git fetch origin }
         if($?) { git reset --hard origin/$headBranch }
