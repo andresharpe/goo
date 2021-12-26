@@ -59,7 +59,7 @@ $goo.Command.Add( 'clean', {
     $goo.Command.Run('dockerDownIfUp')
     $goo.IO.EnsureRemoveFolder(".\_containers\")
     $goo.IO.EnsureRemoveFolder(".\dist\")
-    $goo.Command.RunExternal('dotnet','clean --verbosity:quiet --nologo','.\sln)
+    $goo.Command.RunExternal('dotnet','clean --verbosity:quiet --nologo','.\sln')
     $goo.StopIfError("Failed to clean the project.")
 })
 ```
