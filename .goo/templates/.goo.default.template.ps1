@@ -25,10 +25,10 @@ $goo = [Goo]::new($args)
 $script:SolutionName            = 'ExampleProject'
 
 $script:SourceFolder            = '.\Source'
-$script:SolutionFolder          = "$script:SourceFolder\Solution"
+$script:SolutionFolder          = $script:SourceFolder
 $script:SolutionFile            = "$script:SolutionFolder\Solution.sln"
 $script:ProjectFolder           = "$script:SourceFolder\ExampleProject"
-$script:ProjectFile             = "$script:CliProjectFolder\ExampleProject.csproj"
+$script:ProjectFile             = "$script:ProjectFolder\ExampleProject.csproj"
 
 $script:DefaultEnvironment      = 'Development'
 
@@ -103,7 +103,6 @@ $goo.Command.Add( 'run', {
 # command: goo feature <name> | Creates a new feature branch from your main git branch
 $goo.Command.Add( 'feature', { param( $featureName )
     $goo.Git.CheckoutFeature($featureName)
-    $goo.Version.GooBumpVersion('build')
 })
 
 # command: goo push <message> | Performs 'git add -A', 'git commit -m <message>', 'git -u push origin'
