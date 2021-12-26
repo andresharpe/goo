@@ -39,9 +39,30 @@ Invoke-WebRequest -Method Get -Uri $projectReleaseUri -OutFile $tempFile
 Expand-Archive -Path $tempFile -DestinationPath '.' -Force
 Remove-Item $tempFile -Force
 
+# copy goo.ps1 to user app directory if needed
+
+$gooPath = "$env:USERPROFILE\AppData\Local\Programs\goo\bin"
+if( -not (Test-Path $gooPath) ) { 
+    New-Item $gooPath -ItemType Directory | Out-Null
+}
+
+if( -not (Test-Path "$gooPath\goo.ps1") ) { 
+    Copy-Item .\.goo\goo.ps1 $gooPath | Out-Null
+}
+
+# ensure it's in the PATH
+
+if( -not (($env:Path -split ';').Contains($gooPath))){
+    $env:Path = "$env:Path;$gooPath"
+    [Environment]::SetEnvironmentVariable("Path", $env:Path, [System.EnvironmentVariableTarget]::User)
+}
+
+# create default .goo.ps1 if it doesn't exist
+
 if(-not (Test-Path '.\.goo.ps1')) {
     Copy-Item -Path '.\.goo\templates\.goo.default.template.ps1' -Destination '.\.goo.ps1'
 }
+
 Write-Host ""
 Write-Host -ForegroundColor Magenta -BackgroundColor Black -Object " goo> Success!" 
 Write-Host ""
