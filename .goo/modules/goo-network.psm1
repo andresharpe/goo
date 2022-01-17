@@ -21,8 +21,12 @@ class GooNetwork {
         }
     }
 
-    [bool] IsOnline() {
+    [bool] IsOnlineOld() {
         return $null -ne (Get-NetRoute | Where-Object DestinationPrefix -eq '0.0.0.0/0' | Get-NetIPInterface | Where-Object ConnectionState -eq 'Connected')
+    }
+
+    [bool] IsOnline() {
+        return (Test-Connection 8.8.8.8 -Count 1 -Quiet)
     }
 
 }

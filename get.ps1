@@ -40,21 +40,22 @@ Expand-Archive -Path $tempFile -DestinationPath '.' -Force
 Remove-Item $tempFile -Force
 
 # copy goo.ps1 to user app directory if needed
-
-$gooPath = "$env:USERPROFILE\AppData\Local\Programs\goo\bin"
+$homePath = $env:HOME ?? $env:USERPROFILE
+$gooPath = "$homePath\AppData\Local\Programs\goo\bin"
 if( -not (Test-Path $gooPath) ) { 
     New-Item $gooPath -ItemType Directory | Out-Null
 }
+$gooPath = (Get-Item $gooPath).FullName
 
 if( -not (Test-Path "$gooPath\goo.ps1") ) { 
     Copy-Item .\.goo\goo.ps1 $gooPath | Out-Null
 }
 
 # ensure it's in the PATH
-
-if( -not (($env:Path -split ';').Contains($gooPath))){
-    $env:Path = "$env:Path;$gooPath"
-    [Environment]::SetEnvironmentVariable("Path", $env:Path, [System.EnvironmentVariableTarget]::User)
+$splitChar = ($null -eq $env:HOME ? ';' : ':')
+if( -not (($env:PATH -split $splitChar).Contains($gooPath))){
+    $env:PATH = $env:PATH+$splitChar+$gooPath
+    [Environment]::SetEnvironmentVariable("PATH", $env:PATH, [System.EnvironmentVariableTarget]::User)
 }
 
 # create default .goo.ps1 if it doesn't exist
