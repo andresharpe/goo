@@ -23,10 +23,11 @@ class GooSql {
         if( -not $? ) { $this.Goo.Error( "Sql error." ) }
     }
 
-    [bool] TestConnection([string]$connectionString) {
+    [bool] TestConnection([string]$connString) {
         try {
-            $sqlConnection = New-Object System.Data.SqlClient.SqlConnection $ConnectionString
+            $sqlConnection = New-Object System.Data.SqlClient.SqlConnection $connString
             $sqlConnection.Open()
+            Invoke-Sqlcmd -ConnectionString $connString -Query "SELECT 1" | Out-Null
             return $true
         } catch {
             return $false
@@ -35,10 +36,10 @@ class GooSql {
         }
     }
 
-    [bool] WaitForConnection([string]$connectionString, [int]$seconds) {
+    [bool] WaitForConnection([string]$connString, [int]$seconds) {
         $ret = $false
         for($i = $seconds; $i -gt 0; $i--) {
-            if($this.TestConnection($connectionString)) {
+            if($this.TestConnection($connString)) {
                 $ret = $true
                 break
             }
