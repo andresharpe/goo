@@ -24,17 +24,22 @@ class GooGit {
 
     [void] CheckoutMain()
     {
-        $headBranch = $this.HeadBranch() 
-        git checkout $headBranch
-        if($?) { git pull --prune }
-        if($?) { git fetch origin }
-        if($?) { git reset --hard origin/$headBranch }
-        if($?) { git clean -f -d }
+        $headBranch = $this.HeadBranch()
+        Checkout($headbranch)
     }
 
     [void] CheckoutMaster()
     {
         $this.CheckoutMain()
+    }
+
+    [void] Checkout($branch)
+    {
+        git checkout $branch
+        if($?) { git pull --prune }
+        if($?) { git fetch origin }
+        if($?) { git reset --hard origin/$branch }
+        if($?) { git clean -f -d }
     }
 
     [void] AddCommitPushRemote($message)

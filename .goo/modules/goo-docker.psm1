@@ -23,6 +23,10 @@ class GooDocker {
         $this.Goo.Command.RunExternal( 'docker-compose', "up -d", $folder ) 
     }
 
+    [void] Up([string]$folder, [string] $override) {
+        $this.Goo.Command.RunExternal( 'docker-compose', "-f .\docker-compose.yaml -f $override up -d", $folder ) 
+    }
+
     [void] Down(){
         $this.Down((Get-Location).Path)
     }
