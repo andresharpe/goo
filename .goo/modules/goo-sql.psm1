@@ -15,15 +15,14 @@ class GooSql {
         return "Goo"+$this.Name+"Module"
     }
 
-    [bool] EnsureModuleIsInstalled() {
+    [boolean] EnsureModuleIsInstalled() 
     {
         if( -not ((Get-Module -ListAvailable -Name "SqlServer"))) {
             $this.Goo.Error("Module not found. Please run 'Install-Module -Name SqlServer' as admin")
-            return $false;
+            return $false
         }
-        return $true;
+        return $true
     }
-
 
     [void] Query( [string]$connString, [string]$sql ){
         $this.EnsureModuleIsInstalled()
