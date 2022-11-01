@@ -16,7 +16,7 @@ class GooSql {
     }
 
     [bool] EnsureModuleIsInstalled() {
-
+    {
         if( -not ((Get-Module -ListAvailable -Name "SqlServer"))) {
             $this.Goo.Error("Module not found. Please run 'Install-Module -Name SqlServer' as admin")
             return $false;
