@@ -259,7 +259,6 @@ $goo.Command.Add( 'main', { param( $featureName )
     $goo.Git.CheckoutMain()
 })
 
-
 <# --- START GOO EXECUTION --- #>
 
 $goo.Start()
